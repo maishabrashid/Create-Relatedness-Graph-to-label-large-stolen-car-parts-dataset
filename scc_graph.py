@@ -196,7 +196,7 @@ def build_relatedness_graph(csv_path: str, nrows: int = 5000) -> Tuple[nx.DiGrap
 # ----------------------------
 # SCC selection: one SCC size=11 and one SCC size=15
 # ----------------------------
-def extract_specific_scc_sizes(G: nx.DiGraph, target_sizes=(11, 12)) -> nx.DiGraph:
+def extract_specific_scc_sizes(G: nx.DiGraph, target_sizes=(12,)) -> nx.DiGraph:
     sccs = list(nx.strongly_connected_components(G))
     sizes = [len(c) for c in sccs]
     print(f"Total SCCs: {len(sccs)}")
@@ -218,11 +218,9 @@ def extract_specific_scc_sizes(G: nx.DiGraph, target_sizes=(11, 12)) -> nx.DiGra
         print(f"Available SCC sizes (top 50 unique): {uniq_sizes[:50]}")
         raise ValueError("Requested SCC sizes not found in this graph.")
 
-    # Build induced subgraph
     nodes = set().union(*selected.values())
     H = G.subgraph(nodes).copy()
 
-    # Add SCC annotations for coloring in Gephi / plotting
     for sz, comp in selected.items():
         for n in comp:
             H.nodes[n]["scc_size"] = int(sz)
@@ -233,21 +231,22 @@ def extract_specific_scc_sizes(G: nx.DiGraph, target_sizes=(11, 12)) -> nx.DiGra
 
     return H
 
+
 # ----------------------------
 # Plot and export
 # ----------------------------
-def plot_scc_subgraph(H: nx.DiGraph, out_png="scc_11_15.png"):
+def plot_scc_subgraph(H: nx.DiGraph, out_png="scc_12.png"):
     pos = nx.spring_layout(H, seed=42)
 
     node_colors = []
     for n in H.nodes():
         sz = H.nodes[n].get("scc_size")
-        if sz == 11:
+        if sz == 12:
             node_colors.append("tab:blue")
-        elif sz == 12:
-            node_colors.append("tab:orange")
-        else:
-            node_colors.append("gray")
+        # elif sz == 12:
+        #     node_colors.append("tab:orange")
+        # else:
+        #     node_colors.append("gray")
 
     plt.figure(figsize=(10, 8))
     nx.draw_networkx_nodes(H, pos, node_color=node_colors, node_size=350, alpha=0.9)
@@ -255,7 +254,7 @@ def plot_scc_subgraph(H: nx.DiGraph, out_png="scc_11_15.png"):
     # If you want labels:
     # nx.draw_networkx_labels(H, pos, font_size=7)
 
-    plt.title("Subset graph: one SCC of size 11 (blue) + one SCC of size 12 (orange)")
+    plt.title("SCC of size 12")
     plt.axis("off")
     plt.tight_layout()
     plt.savefig(out_png, dpi=200)
@@ -273,10 +272,10 @@ if __name__ == "__main__":
     G, df = build_relatedness_graph(CSV_PATH, nrows=NROWS)
 
     # 2) Extract SCC size 11 and 15 subgraph
-    H = extract_specific_scc_sizes(G, target_sizes=(11, 12))
+    H = extract_specific_scc_sizes(G, target_sizes=(12,))
 
     # 3) Export for Gephi + plot png
-    nx.write_gexf(H, "scc_size_11_and_15.gexf")
-    print("Saved: scc_size_11_and_15.gexf (open in Gephi)")
+    # nx.write_gexf(H, "scc_size_11_and_15.gexf")
+    # print("Saved: scc_size_11_and_15.gexf (open in Gephi)")
 
     plot_scc_subgraph(H, out_png="scc_11_15.png")
