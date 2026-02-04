@@ -169,9 +169,6 @@ def export_scc_csvs(G: nx.DiGraph, post_phones: dict, post_locs: dict,
 
     print(f"SCCs: {len(sccs)}  |  Saved {scc_summary_path} and {scc_members_path}")
 
-# =========================
-# Main
-# =========================
 if __name__ == "__main__":
     CSV_PATH = "/data/rashidm/car-parts/carparts_alig_no_dup_images_nodup_ner.csv"  # <-- update path
     NROWS = 1000000
